@@ -1,4 +1,4 @@
-#!/home/mimsydev/workspace/github/mimsydev/maze_solver/bin/python3
+#!/home/mimsydev/workspace/github/mimsydev/maze_solver/bin/python3.10
 # -*- coding: utf-8 -*-
 import re
 import sys
