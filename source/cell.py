@@ -9,7 +9,7 @@ class Cell:
     _y1: int
     _x2: int
     _y2: int
-    _win: Window
+    _win: Window | None = None
     has_top_wall: bool = True
     has_right_wall: bool = True
     has_bottom_wall: bool = True
@@ -21,18 +21,14 @@ class Cell:
         br_point = Point(self._x2,self._y2)
         bl_point = Point(self._x1,self._y2)
 
-        if self.has_top_wall:
-            top_wall = Line(tl_point,tr_point)
-            self._win.draw_line(top_wall, "black")
-        if self.has_right_wall:
-            right_wall = Line(tr_point,br_point)
-            self._win.draw_line(right_wall, "black")
-        if self.has_bottom_wall:
-            bottom_wall = Line(br_point,bl_point)
-            self._win.draw_line(bottom_wall, "black")
-        if self.has_left_wall:
-            left_wall = Line(bl_point,tl_point)
-            self._win.draw_line(left_wall, "black")
+        top_wall = Line(tl_point,tr_point)
+        right_wall = Line(tr_point,br_point)
+        bottom_wall = Line(br_point,bl_point)
+        left_wall = Line(bl_point,tl_point)
+        self._win.draw_line(top_wall, "black" if self.has_top_wall else "#d9d9d9")
+        self._win.draw_line(right_wall, "black" if self.has_right_wall else "#d9d9d9")
+        self._win.draw_line(bottom_wall, "black" if self.has_bottom_wall else "#d9d9d9")
+        self._win.draw_line(left_wall, "black" if self.has_left_wall else "#d9d9d9")
 
     def draw_move(self, to_cell: Cell, undo: bool = False) -> None:
         s_point = Point((self._x1+self._x2)//2, (self._y1+self._y2)//2)
