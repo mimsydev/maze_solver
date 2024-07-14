@@ -7,4 +7,5 @@ if __name__ == "__main__":
     win = Window(502,502)
     print("Built the window")
     maze = Maze(x1=1,y1=1,cell_size_x=20,cell_size_y=20,row_count=25,col_count=25,win=win)
-    maze._draw_cells()
+    maze.solve()
+    maze.win.wait_for_close()
