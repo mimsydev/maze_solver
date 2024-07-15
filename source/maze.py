@@ -42,6 +42,35 @@ class Maze:
 
     def _break_walls_r(self, visited: list[tuple[int,int]], i: int, j:int) -> None:
         visited.append((i,j))
+        to_visit: list[tuple[int,int]] = []
+        neighbors: list[tuple[int,int]] = []
+        len_rows = len(self._cells)
+        len_cols = len(self._cells[0])
+
+        # Checking for top neighbors
+        if i > 0:
+            if j > 0:
+                neighbors.append((i-1,j-1))
+            if j < len_cols - 1:
+                neighbors.append((i-1,j+1))
+            neighbors.append((i-1,j))
+        # Checking for bottom neighbors
+        if i < len_rows - 1:
+            if j > 0:
+                neighbors.append((i+1,j-1))
+            if j < len_cols - 1:
+                neighbors.append((i+1,j+1))
+            neighbors.append((i+1,j))
+        # Checking for side neighbors
+        if j > 0:
+            neighbors.append((i,j-1))
+        if j < len_cols - 1:
+            neighbors.append((i,j+1))
+
+        to_visit = list(filter(lambda n: n not in visited, neighbors))
+
+
+
 
 
     def _draw_cell(self, i: int = 0, j: int = 0) -> None:
