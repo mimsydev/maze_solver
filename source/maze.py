@@ -2,6 +2,7 @@ from .window import Window
 from .cell import Cell
 from dataclasses import dataclass
 import time
+from random import random, randrange
 
 @dataclass
 class Maze:
@@ -22,6 +23,7 @@ class Maze:
             for j, _ in enumerate(row):
                 self._draw_cell(i,j)
         self._break_entrance_and_exit()
+        self._break_walls()
 
     def _create_cells(self) -> None:
         self._cells = [[ Cell(self.x1+(j*self.cell_size_x),
@@ -42,32 +44,55 @@ class Maze:
 
     def _break_walls_r(self, visited: list[tuple[int,int]], i: int, j:int) -> None:
         visited.append((i,j))
-        to_visit: list[tuple[int,int]] = []
-        neighbors: list[tuple[int,int]] = []
-        len_rows = len(self._cells)
-        len_cols = len(self._cells[0])
+        while True:
+            to_visit: list[tuple[int,int]] = []
+            len_rows = len(self._cells)
+            len_cols = len(self._cells[0])
 
-        # Checking for top neighbors
-        if i > 0:
-            if j > 0:
-                neighbors.append((i-1,j-1))
-            if j < len_cols - 1:
-                neighbors.append((i-1,j+1))
-            neighbors.append((i-1,j))
-        # Checking for bottom neighbors
-        if i < len_rows - 1:
-            if j > 0:
-                neighbors.append((i+1,j-1))
-            if j < len_cols - 1:
-                neighbors.append((i+1,j+1))
-            neighbors.append((i+1,j))
-        # Checking for side neighbors
-        if j > 0:
-            neighbors.append((i,j-1))
-        if j < len_cols - 1:
-            neighbors.append((i,j+1))
+            # Checking for top neighbors
+            if i > 0 and (i-1,j) not in visited:
+                to_visit.append((i-1,j))
+            # Checking for bottom neighbors
+            if i < len_rows - 1 and (i+1,j) not in visited:
+                to_visit.append((i+1,j))
+            # Checking for side neighbors
+            if j > 0 and (i,j-1) not in visited:
+                to_visit.append((i,j-1))
+            if j < len_cols - 1 and (i,j+1) not in visited:
+                to_visit.append((i,j+1))
 
-        to_visit = list(filter(lambda n: n not in visited, neighbors))
+            if len(to_visit) == 0:
+                return
+            to_cell_index = to_visit[randrange(len(to_visit))]
+
+            if to_cell_index == (i-1,j):
+                # Top neighbor
+                self._cells[i][j].has_top_wall = False
+                self._draw_cell(i,j)
+                self._cells[i-1][j].has_bottom_wall = False
+                self._draw_cell(i-1,j)
+                self._break_walls_r(visited,i=i-1,j=j)
+            elif to_cell_index == (i,j+1):
+                # Right neighbor
+                self._cells[i][j].has_right_wall = False
+                self._draw_cell(i,j)
+                self._cells[i][j+1].has_left_wall = False
+                self._draw_cell(i,j+1)
+                self._break_walls_r(visited,i=i,j=j+1)
+            elif to_cell_index == (i+1,j):
+                # Bottom neighbor
+                self._cells[i][j].has_bottom_wall = False
+                self._draw_cell(i,j)
+                self._cells[i+1][j].has_top_wall = False
+                self._draw_cell(i+1,j)
+                self._break_walls_r(visited,i=i+1,j=j)
+            elif to_cell_index == (i,j-1):
+                # Left neighbor
+                self._cells[i][j].has_left_wall = False
+                self._draw_cell(i,j)
+                self._cells[i][j-1].has_right_wall = False
+                self._draw_cell(i,j-1)
+                self._break_walls_r(visited,i=i,j=j-1)
 
 
 
