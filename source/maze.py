@@ -2,7 +2,7 @@ from .window import Window
 from .cell import Cell
 from dataclasses import dataclass
 import time
-from random import random, randrange
+from random import randrange
 
 @dataclass
 class Maze:
@@ -18,12 +18,79 @@ class Maze:
     def __post_init__(self) -> None:
         self._create_cells()
 
-    def solve(self) -> None:
+    def draw_maze(self) -> None:
         for i, row in enumerate(self._cells):
             for j, _ in enumerate(row):
                 self._draw_cell(i,j)
         self._break_entrance_and_exit()
         self._break_walls()
+
+    def solve_maze(self) -> bool:
+        visited: list[tuple[int, int]] = []
+        return self._solve_maze_r(visited, 0, 0)
+
+    def _solve_maze_r(self, visited: list[tuple[int,int]], i: int, j: int) -> bool:
+        self._animate()
+        visited.append((i,j))
+        if self._cells[i][j] == self._cells[-1][-1]:
+            return True
+
+        to_visit: list[tuple[int,int]] = []
+        len_rows = len(self._cells)
+        len_cols = len(self._cells[0])
+
+        # Checking for top neighbors
+        if i > 0 and (i-1,j) not in visited and not self._cells[i-1][j].has_bottom_wall:
+            to_visit.append((i-1,j))
+        # Checking for bottom neighbors
+        if i < len_rows - 1 and (i+1,j) not in visited \
+            and not self._cells[i+1][j].has_top_wall:
+            to_visit.append((i+1,j))
+        # Checking for side neighbors
+        if j > 0 and (i,j-1) not in visited \
+            and not self._cells[i][j-1].has_right_wall:
+            to_visit.append((i,j-1))
+        if j < len_cols - 1 and (i,j+1) not in visited \
+            and not self._cells[i][j+1].has_left_wall:
+            to_visit.append((i,j+1))
+
+        for to_cell_index in to_visit:
+            if to_cell_index == (i-1,j):
+                # Top neighbor
+                self._cells[i][j].draw_move(self._cells[i-1][j])
+                cont = self._solve_maze_r(visited,i=i-1,j=j)
+                if cont:
+                    return True
+                else:
+                    self._cells[i][j].draw_move(self._cells[i-1][j], True)
+            elif to_cell_index == (i,j+1):
+                # Right neighbor
+                self._cells[i][j].draw_move(self._cells[i][j+1])
+                cont = self._solve_maze_r(visited,i=i,j=j+1)
+                if cont:
+                    return True
+                else:
+                    self._cells[i][j].draw_move(self._cells[i][j+1], True)
+            elif to_cell_index == (i+1,j):
+                # Bottom neighbor
+                self._cells[i][j].draw_move(self._cells[i+1][j])
+                cont = self._solve_maze_r(visited,i=i+1,j=j)
+                if cont:
+                    return True
+                else:
+                    self._cells[i][j].draw_move(self._cells[i+1][j], True)
+            elif to_cell_index == (i,j-1):
+                # Left neighbor
+                self._cells[i][j].draw_move(self._cells[i][j-1])
+                cont = self._solve_maze_r(visited,i=i,j=j-1)
+                if cont:
+                    return True
+                else:
+                    self._cells[i][j].draw_move(self._cells[i][j-1], True)
+        else:
+            return False
+
+
 
     def _create_cells(self) -> None:
         self._cells = [[ Cell(self.x1+(j*self.cell_size_x),
@@ -104,4 +171,4 @@ class Maze:
 
     def _animate(self) -> None:
         self.win.redraw()
-        time.sleep(0.01)
+        time.sleep(0.02)
